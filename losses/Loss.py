@@ -1,0 +1,77 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+
+def bce_loss(pred, target):
+
+    return F.binary_cross_entropy_with_logits(
+        pred,
+        target,
+    )
+
+
+def dice_loss(pred, target, eps=1e-6):
+
+    pred = torch.sigmoid(pred)
+
+    pred = pred.view(pred.size(0), -1)
+    target = target.view(target.size(0), -1)
+
+    intersection = (pred * target).sum(dim=1)
+
+    union = pred.sum(dim=1) + target.sum(dim=1)
+
+    dice = (2.0 * intersection + eps) / (union + eps)
+
+    return 1.0 - dice.mean()
+
+
+def mse_loss(pred, target):
+
+    pred = torch.sigmoid(pred)
+
+    return F.mse_loss(pred, target)
+
+
+LOSS_REGISTRY = {
+    "bce": bce_loss,
+    "dice": dice_loss,
+    "mse": mse_loss,
+}
+
+
+class CombinedLoss(nn.Module):
+
+    def __init__(self, config):
+
+        super().__init__()
+
+        self.loss_items = []
+
+        weights = config.get("weights", {})
+
+        for name, weight in weights.items():
+
+            if name not in LOSS_REGISTRY:
+                raise ValueError(f"Unknown loss: {name}")
+
+            self.loss_items.append(
+                (LOSS_REGISTRY[name], weight, name)
+            )
+
+    def forward(self, pred, target):
+
+        total_loss = 0.0
+
+        loss_dict = {}
+
+        for fn, weight, name in self.loss_items:
+
+            loss = fn(pred, target)
+
+            total_loss += weight * loss
+
+            loss_dict[name] = loss.item()
+
+        return total_loss, loss_dict

@@ -1,0 +1,33 @@
+model: unet_edge_v2
+
+forward_model: unet_edge_v2
+forward_checkpoint: Forward_Model.pt
+
+loss:
+  weights:
+    bce: 1
+    dice: 1
+    mse: 0.5
+
+save_every: 5
+lr: 0.0001
+batch_size: 5
+epochs: 50
+weight_decay: 0.00001
+log_every: 1
+
+data_root: /content/data/mental_layer_input/png
+
+pattern_types:
+  - mental_layer
+  - mental_line
+  - mental_corner
+  - mental_curve
+  - mental_head
+  - mental_circle
+
+output_root: /content/drive/MyDrive/Colab Notebooks/experiments_ILT
+output_dir: exp_ilt_unet_edge_v2_bce_dice_0.5mse
+device: auto
+num_workers: 0
+seed: 42

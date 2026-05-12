@@ -1,0 +1,38 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# VSCode
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Dataset
+data/
+datasets/data/
+
+# Training outputs
+experiments/
+logs/
+runs/
+outputs/
+
+# Model weights
+*.pt
+*.pth
+*.ckpt
+
+# Images
+*.png
+*.jpg
+*_evaluation.csv
+
+# System
+.DS_Store
+Thumbs.db
+
+image_comparation.py
+train_log_figure.py
+run_pipeline.py
+rename.py
