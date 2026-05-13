@@ -19,7 +19,7 @@ runs/
 outputs/
 
 # Model weights
-*.pt
+# *.pt
 *.pth
 *.ckpt
 
