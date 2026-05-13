@@ -5,9 +5,7 @@ forward_checkpoint: Forward_Model.pt
 
 loss:
   weights:
-    bce: 1
-    dice: 1
-    mse: 0.5
+    mse: 1
 
 save_every: 5
 lr: 0.0001
@@ -16,7 +14,7 @@ epochs: 50
 weight_decay: 0.00001
 log_every: 1
 
-data_root: /content/data/mental_layer_input/png
+data_root: /content/data_ilt/mental_layer_input/png
 
 pattern_types:
   - mental_layer
@@ -27,7 +25,7 @@ pattern_types:
   - mental_circle
 
 output_root: /content/drive/MyDrive/Colab Notebooks/experiments_ILT
-output_dir: exp_ilt_unet_edge_v2_bce_dice_0.5mse
+output_dir: exp_ilt_unet_edge_v2_mse
 device: auto
 num_workers: 0
 seed: 42
