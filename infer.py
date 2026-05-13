@@ -94,7 +94,7 @@ def main():
     project_root = Path(__file__).resolve().parent
 
     DRIVE_ROOT = Path(
-        r"D:\content\drive\MyDrive\Colab Notebooks"
+        r"/content/drive/MyDrive/Colab Notebooks"
     )
 
     exp_name = args.exp_name
