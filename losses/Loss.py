@@ -33,16 +33,33 @@ def mse_loss(pred, target):
 
     return F.mse_loss(pred, target)
 
+def tv_loss(pred):
+    
+    dh = torch.mean(
+        torch.abs(
+            pred[:, :, 1:, :] - pred[:, :, :-1, :]
+        )
+    )
+
+    dw = torch.mean(
+        torch.abs(
+            pred[:, :, :, 1:] - pred[:, :, :, :-1]
+        )
+    )
+
+    return dh + dw
+
 
 LOSS_REGISTRY = {
     "bce": bce_loss,
     "dice": dice_loss,
     "mse": mse_loss,
+    "tv": tv_loss,
 }
 
 
 class CombinedLoss(nn.Module):
-
+    
     def __init__(self, config):
 
         super().__init__()
@@ -60,7 +77,12 @@ class CombinedLoss(nn.Module):
                 (LOSS_REGISTRY[name], weight, name)
             )
 
-    def forward(self, pred, target):
+    def forward(
+        self,
+        pred,
+        target,
+        mask_prob=None,
+    ):
 
         total_loss = 0.0
 
@@ -68,7 +90,26 @@ class CombinedLoss(nn.Module):
 
         for fn, weight, name in self.loss_items:
 
-            loss = fn(pred, target)
+            # ==========================================
+            # TV Loss 使用 mask_prob
+            # ==========================================
+
+            if name == "tv":
+
+                if mask_prob is None:
+                    raise ValueError(
+                        "mask_prob is required for tv loss"
+                    )
+
+                loss = fn(mask_prob)
+
+            # ==========================================
+            # 其它 loss 保持原逻辑
+            # ==========================================
+
+            else:
+
+                loss = fn(pred, target)
 
             total_loss += weight * loss
 

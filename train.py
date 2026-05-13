@@ -330,6 +330,7 @@ def main():
                 loss, loss_dict = criterion(
                     resist_pred,
                     target,
+                    mask_prob,
                 )
 
                 # ==========================================
