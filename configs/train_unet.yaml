@@ -8,12 +8,11 @@ loss:
     bce: 1
     dice: 1
     mse: 0.5
-    tv: 0.5
 
 save_every: 5
 lr: 0.0001
 batch_size: 5
-epochs: 50
+epochs: 100
 weight_decay: 0.00001
 log_every: 1
 
@@ -28,7 +27,7 @@ pattern_types:
   - mental_circle
 
 output_root: /content/drive/MyDrive/Colab Notebooks/experiments_ILT
-output_dir: exp_ilt_unet_edge_v2_bce_dice_0.5mse_0.5tv
+output_dir: exp_ilt_unet_edge_v2_bce_dice_0.5mse
 device: auto
 num_workers: 0
 seed: 42

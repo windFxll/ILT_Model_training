@@ -4,6 +4,7 @@ import random
 import logging
 
 import torch
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 import torch.optim as optim
 import yaml
@@ -133,6 +134,38 @@ def build_model(model_name):
         )
 
     return MODEL_REGISTRY[key]()
+
+
+# ==================================================
+# Gaussian Blur
+# ==================================================
+
+def gaussian_blur(x):
+
+    kernel = torch.tensor(
+        [
+            [1, 2, 1],
+            [2, 4, 2],
+            [1, 2, 1],
+        ],
+        dtype=x.dtype,
+        device=x.device,
+    )
+
+    kernel = kernel / kernel.sum()
+
+    kernel = kernel.view(1, 1, 3, 3)
+
+    kernel = kernel.repeat(x.shape[1], 1, 1, 1)
+
+    x = F.conv2d(
+        x,
+        kernel,
+        padding=1,
+        groups=x.shape[1],
+    )
+
+    return x
 
 
 # ==================================================
@@ -320,6 +353,8 @@ def main():
                 mask_pred = inverse_model(target)
 
                 mask_prob = torch.sigmoid(mask_pred)
+                
+                mask_prob = gaussian_blur(mask_prob)
 
                 resist_pred = forward_model(mask_prob)
 
