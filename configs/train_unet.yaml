@@ -1,4 +1,4 @@
-model: unet_edge_v2
+model: unet_smooth
 
 forward_model: unet_edge_v2
 forward_checkpoint: Forward_Model.pt
@@ -27,7 +27,7 @@ pattern_types:
   - mental_circle
 
 output_root: /content/drive/MyDrive/Colab Notebooks/experiments_ILT
-output_dir: exp_ilt_unet_edge_v2_bce_dice_0.5mse
+output_dir: exp_ilt_unet_smooth_bce_dice_0.5mse
 device: auto
 num_workers: 0
 seed: 42
