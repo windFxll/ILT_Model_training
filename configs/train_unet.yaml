@@ -1,6 +1,6 @@
 model: unet_smooth
 
-forward_model: unet_edge_v2
+forward_model: unet_smooth
 forward_checkpoint: Forward_Model.pt
 
 loss:
@@ -31,3 +31,5 @@ output_dir: exp_ilt_unet_smooth_bce_dice_0.5mse
 device: auto
 num_workers: 0
 seed: 42
+
+remark: 把高斯模糊去掉了，然后在 sigmoid 函数里除以五，增加了梯度输出。怕梯度死了网络不能继续训练了.正向和逆向全部都改用 smooth 了。

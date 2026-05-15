@@ -351,10 +351,16 @@ def main():
                 # ==========================================
 
                 mask_pred = inverse_model(target)
+                mask_min = mask_pred.min().item()
+                mask_max = mask_pred.max().item()
+                mask_mean = mask_pred.mean().item()
 
-                mask_prob = torch.sigmoid(mask_pred)
+                mask_prob = torch.sigmoid(mask_pred / 5.0)
+                prob_min = mask_prob.min().item()
+                prob_max = mask_prob.max().item()
+                prob_mean = mask_prob.mean().item()
                 
-                mask_prob = gaussian_blur(mask_prob)
+                # mask_prob = gaussian_blur(mask_prob)
 
                 resist_pred = forward_model(mask_prob)
 
@@ -375,7 +381,19 @@ def main():
                 optimizer.zero_grad()
 
                 loss.backward()
+                grad_mean = 0.0
+                grad_count = 0
 
+                for p in inverse_model.parameters():
+
+                    if p.grad is not None:
+
+                        grad_mean += p.grad.abs().mean().item()
+                        grad_count += 1
+
+                if grad_count > 0:
+                    grad_mean /= grad_count
+                    
                 optimizer.step()
 
                 total_loss += loss.item()
@@ -394,6 +412,13 @@ def main():
                         f"Batch {batch_idx}/{len(loader)} "
                         f"Total={loss.item():.4f} "
                         f"{log_str}"
+                        f"| logits[min={mask_min:.2f}, "
+                        f"max={mask_max:.2f}, "
+                        f"mean={mask_mean:.2f}] "
+                        f"| prob[min={prob_min:.2f}, "
+                        f"max={prob_max:.2f}, "
+                        f"mean={prob_mean:.2f}]"
+                        f" | grad={grad_mean:.6f}"
                     )
 
             # ==============================================
