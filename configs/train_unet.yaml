@@ -9,7 +9,7 @@ loss:
 
 save_every: 1
 lr: 0.00001
-batch_size: 5
+batch_size: 50
 epochs: 20
 weight_decay: 0.00001
 log_every: 1
@@ -25,10 +25,7 @@ pattern_types:
   - mental_circle
 
 output_root: /content/drive/MyDrive/Colab Notebooks/experiments_ILT
-output_dir: exp_ilt_unet_smooth_mse_residue_constrain_init_1e-5_blur
+output_dir: exp_ilt_unet_smooth_debug
 device: auto
 num_workers: 0
 seed: 42
-
-remark: 把高斯模糊去掉了，然后在 sigmoid 函数里除以五，增加了梯度输出。怕梯度死了网络不能继续训练了.正向和逆向全部都改用 smooth 了。
-remark: 加了残差。做局部优化应该比全局要好吧

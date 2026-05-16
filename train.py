@@ -298,6 +298,25 @@ def main():
             config.get("weight_decay", 1e-5)
         ),
     )
+    
+    # ==============================================
+    # Save Initial Checkpoint (Epoch 0)
+    # ==============================================
+
+    init_ckpt_path = (
+        checkpoint_dir / "checkpoint_epoch_000.pt"
+    )
+
+    save_checkpoint(
+        init_ckpt_path,
+        epoch_idx=-1,
+        epoch_loss=None,
+    )
+
+    logger.info(
+        f"[Save] Initial checkpoint -> "
+        f"{init_ckpt_path}"
+    )
 
     # ==================================================
     # Training
@@ -352,7 +371,7 @@ def main():
 
                 # 网络输出 correction（增量修正）
                 delta = inverse_model(target)
-                delta = 5.0 * torch.tanh(delta)
+                delta = 0.5 * torch.tanh(delta)
 
                 # ------------------------------------------
                 # 初始化 mask logits
@@ -364,11 +383,14 @@ def main():
                 # 初始 mask ≈ target
                 # ------------------------------------------
 
-                base_logits = (target * 2.0 - 1.0) * 5.0
+                base_logits = (target * 2.0 - 1.0) * 1.5
 
                 # 最终 logits
                 delta_scale = 1.0
                 mask_logits = base_logits + delta_scale * delta
+                delta_min = delta.min().item()
+                delta_max = delta.max().item()
+                delta_mean = delta.mean().item()
 
                 # 日志统计
                 mask_min = mask_logits.min().item()
@@ -397,7 +419,7 @@ def main():
                 # prob_max = mask_prob.max().item()
                 # prob_mean = mask_prob.mean().item()
                 
-                mask_prob = gaussian_blur(mask_prob)
+                # mask_prob = gaussian_blur(mask_prob)
 
                 resist_pred = forward_model(mask_prob)
 
@@ -456,6 +478,9 @@ def main():
                         f"max={prob_max:.2f}, "
                         f"mean={prob_mean:.2f}]"
                         f" | grad={grad_mean:.6f}"
+                        f"| delta[min={delta_min:.4f}, "
+                        f"max={delta_max:.4f}, "
+                        f"mean={delta_mean:.4f}] "
                     )
 
             # ==============================================
