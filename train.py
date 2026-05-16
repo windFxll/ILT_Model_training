@@ -352,6 +352,7 @@ def main():
 
                 # 网络输出 correction（增量修正）
                 delta = inverse_model(target)
+                delta = torch.tanh(delta)
 
                 # ------------------------------------------
                 # 初始化 mask logits
@@ -366,7 +367,8 @@ def main():
                 base_logits = (target * 2.0 - 1.0) * 5.0
 
                 # 最终 logits
-                mask_logits = base_logits + 0.5 * delta
+                delta_scale = 2.0
+                mask_logits = base_logits + delta_scale * delta
 
                 # 日志统计
                 mask_min = mask_logits.min().item()
