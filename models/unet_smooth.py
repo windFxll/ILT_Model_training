@@ -234,6 +234,16 @@ class UNetSmooth(nn.Module):
             1,
             kernel_size=1,
         )
+        
+        # ==========================================
+        # Zero Initialization
+        # Initial delta ≈ 0
+        # ==========================================
+
+        nn.init.zeros_(self.out.weight)
+
+        if self.out.bias is not None:
+            nn.init.zeros_(self.out.bias)
 
     def forward(self, x):
 

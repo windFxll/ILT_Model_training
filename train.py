@@ -367,7 +367,7 @@ def main():
                 base_logits = (target * 2.0 - 1.0) * 5.0
 
                 # 最终 logits
-                delta_scale = 2.0
+                delta_scale = 1.0
                 mask_logits = base_logits + delta_scale * delta
 
                 # 日志统计
