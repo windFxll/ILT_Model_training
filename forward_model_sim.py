@@ -7,7 +7,7 @@ import numpy as np
 # =========================
 # 直接调用固定模型
 # =========================
-from models.unet_edge_v2 import UNetEdge_v2
+from models.unet_smooth import UNetSmooth
 
 
 def parse_args():
@@ -28,7 +28,7 @@ def parse_args():
 # ==================================================
 def load_model(model_path, device):
 
-    model = UNetEdge_v2()
+    model = UNetSmooth()
 
     ckpt = torch.load(model_path, map_location=device)
 

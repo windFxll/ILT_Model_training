@@ -350,15 +350,50 @@ def main():
                 # Inverse Lithography
                 # ==========================================
 
-                mask_pred = inverse_model(target)
-                mask_min = mask_pred.min().item()
-                mask_max = mask_pred.max().item()
-                mask_mean = mask_pred.mean().item()
+                # 网络输出 correction（增量修正）
+                delta = inverse_model(target)
 
-                mask_prob = torch.sigmoid(mask_pred / 5.0)
+                # ------------------------------------------
+                # 初始化 mask logits
+                # target:
+                #   0 -> -5
+                #   1 -> +5
+                #
+                # 这样 sigmoid 后：
+                # 初始 mask ≈ target
+                # ------------------------------------------
+
+                base_logits = (target * 2.0 - 1.0) * 5.0
+
+                # 最终 logits
+                mask_logits = base_logits + 0.5 * delta
+
+                # 日志统计
+                mask_min = mask_logits.min().item()
+                mask_max = mask_logits.max().item()
+                mask_mean = mask_logits.mean().item()
+
+                # sigmoid
+                mask_prob = torch.sigmoid(mask_logits / 5.0)
+
                 prob_min = mask_prob.min().item()
                 prob_max = mask_prob.max().item()
                 prob_mean = mask_prob.mean().item()
+                
+                # # ==========================================
+                # # Inverse Lithography
+                # # ==========================================
+
+                # mask_pred = inverse_model(target)
+                
+                # mask_min = mask_pred.min().item()
+                # mask_max = mask_pred.max().item()
+                # mask_mean = mask_pred.mean().item()
+
+                # mask_prob = torch.sigmoid(mask_pred / 5.0)
+                # prob_min = mask_prob.min().item()
+                # prob_max = mask_prob.max().item()
+                # prob_mean = mask_prob.mean().item()
                 
                 # mask_prob = gaussian_blur(mask_prob)
 
