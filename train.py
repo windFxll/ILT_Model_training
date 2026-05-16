@@ -352,7 +352,7 @@ def main():
 
                 # 网络输出 correction（增量修正）
                 delta = inverse_model(target)
-                delta = torch.tanh(delta)
+                delta = 5.0 * torch.tanh(delta)
 
                 # ------------------------------------------
                 # 初始化 mask logits
@@ -376,7 +376,7 @@ def main():
                 mask_mean = mask_logits.mean().item()
 
                 # sigmoid
-                mask_prob = torch.sigmoid(mask_logits / 5.0)
+                mask_prob = torch.sigmoid(mask_logits)
 
                 prob_min = mask_prob.min().item()
                 prob_max = mask_prob.max().item()
@@ -397,7 +397,7 @@ def main():
                 # prob_max = mask_prob.max().item()
                 # prob_mean = mask_prob.mean().item()
                 
-                # mask_prob = gaussian_blur(mask_prob)
+                mask_prob = gaussian_blur(mask_prob)
 
                 resist_pred = forward_model(mask_prob)
 
