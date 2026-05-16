@@ -298,25 +298,6 @@ def main():
             config.get("weight_decay", 1e-5)
         ),
     )
-    
-    # ==============================================
-    # Save Initial Checkpoint (Epoch 0)
-    # ==============================================
-
-    init_ckpt_path = (
-        checkpoint_dir / "checkpoint_epoch_000.pt"
-    )
-
-    save_checkpoint(
-        init_ckpt_path,
-        epoch_idx=-1,
-        epoch_loss=None,
-    )
-
-    logger.info(
-        f"[Save] Initial checkpoint -> "
-        f"{init_ckpt_path}"
-    )
 
     # ==================================================
     # Training
@@ -345,7 +326,24 @@ def main():
             },
             str(path),
         )
+    # ==============================================
+    # Save Initial Checkpoint (Epoch 0)
+    # ==============================================
 
+    init_ckpt_path = (
+        checkpoint_dir / "checkpoint_epoch_000.pt"
+    )
+
+    save_checkpoint(
+        init_ckpt_path,
+        epoch_idx=-1,
+        epoch_loss=None,
+    )
+
+    logger.info(
+        f"[Save] Initial checkpoint -> "
+        f"{init_ckpt_path}"
+    )
     try:
 
         for epoch in range(epochs):

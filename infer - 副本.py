@@ -6,7 +6,6 @@ import numpy as np
 import yaml
 
 from models.registry import MODEL_REGISTRY
-import torch.nn.functional as F
 
 
 def parse_args():
@@ -68,38 +67,10 @@ def preprocess(img_path):
 
     return x
 
-# ==================================================
-# Gaussian Blur
-# ==================================================
-
-def gaussian_blur(x):
-
-    kernel = torch.tensor(
-        [
-            [1, 2, 1],
-            [2, 4, 2],
-            [1, 2, 1],
-        ],
-        dtype=x.dtype,
-        device=x.device,
-    )
-
-    kernel = kernel / kernel.sum()
-
-    kernel = kernel.view(1, 1, 3, 3)
-
-    kernel = kernel.repeat(x.shape[1], 1, 1, 1)
-
-    x = F.conv2d(
-        x,
-        kernel,
-        padding=1,
-        groups=x.shape[1],
-    )
-
-    return x
 
 def postprocess(pred):
+
+    pred = torch.sigmoid(pred)
 
     pred = pred.squeeze().cpu().numpy()
 
@@ -252,32 +223,9 @@ def main():
 
             with torch.no_grad():
 
-                # ==========================================
-                # delta prediction
-                # ==========================================
+                pred = model(x)
 
-                delta = model(x)
-
-                delta = 0.5 * torch.tanh(delta)
-
-                # ==========================================
-                # base logits
-                # 与 train.py 保持一致
-                # ==========================================
-
-                base_logits = (x * 2.0 - 1.0) * 1.5
-
-                # ==========================================
-                # final logits
-                # ==========================================
-
-                mask_logits = base_logits + delta
-
-                mask_prob = torch.sigmoid(mask_logits)
-                
-                mask_prob = gaussian_blur(mask_prob)
-
-            result = postprocess(mask_prob)
+            result = postprocess(pred)
 
             save_name = (
                 f"mental_layer_{i:05d}.png"
