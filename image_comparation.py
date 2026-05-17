@@ -247,7 +247,7 @@ def main():
     ax1.set_xlabel("Epoch")
     ax1.set_ylabel("Gap / Profile Error")
     ax1.grid(True)
-    ax1.set_ylim(0, 30)
+    ax1.set_ylim(0, 80)
 
     # 右轴：MSE
     ax2 = ax1.twinx()
@@ -263,7 +263,7 @@ def main():
 
     ax2.set_ylabel("MSE")
     ax2.tick_params(axis="y", labelcolor="green")
-    ax2.set_ylim(0.01, 0.03)
+    ax2.set_ylim(0, 0.2)
 
     # 合并图例
     lines1, labels1 = ax1.get_legend_handles_labels()

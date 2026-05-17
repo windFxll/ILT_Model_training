@@ -140,9 +140,16 @@ def build_model(model_name):
 # Gaussian Blur
 # ==================================================
 
-def gaussian_blur(x):
+def gaussian_blur(
+    x,
+    blur_strength=1.0,
+):
 
-    kernel = torch.tensor(
+    # ==========================================
+    # Base Gaussian Kernel
+    # ==========================================
+
+    base_kernel = torch.tensor(
         [
             [1, 2, 1],
             [2, 4, 2],
@@ -152,11 +159,51 @@ def gaussian_blur(x):
         device=x.device,
     )
 
+    # ==========================================
+    # Identity Kernel (No Blur)
+    # ==========================================
+
+    identity_kernel = torch.tensor(
+        [
+            [0, 0, 0],
+            [0, 1, 0],
+            [0, 0, 0],
+        ],
+        dtype=x.dtype,
+        device=x.device,
+    )
+
+    # ==========================================
+    # Blend Blur
+    # ==========================================
+
+    kernel = (
+        blur_strength * base_kernel
+        + (1.0 - blur_strength) * identity_kernel
+    )
+
+    # ==========================================
+    # Normalize
+    # ==========================================
+
     kernel = kernel / kernel.sum()
+
+    # ==========================================
+    # Conv Format
+    # ==========================================
 
     kernel = kernel.view(1, 1, 3, 3)
 
-    kernel = kernel.repeat(x.shape[1], 1, 1, 1)
+    kernel = kernel.repeat(
+        x.shape[1],
+        1,
+        1,
+        1,
+    )
+
+    # ==========================================
+    # Blur
+    # ==========================================
 
     x = F.conv2d(
         x,
@@ -204,6 +251,7 @@ def main():
     delta_scale = float(config.get("delta_scale", 0.5))
     sigmoid_scale = float(config.get("sigmoid_scale", 1.0))
     use_gaussian_blur = config.get("use_gaussian_blur", False)
+    gaussian_blur_strength = float(config.get("blur_strength", 1.0))
     
     # ==================================================
     # Dataset
@@ -390,11 +438,10 @@ def main():
                 mask_mean = mask_logits.mean().item()
 
                 # sigmoid
-                sigmoid_scale = 1.0
                 mask_prob = torch.sigmoid(sigmoid_scale * mask_logits)
                 
                 if use_gaussian_blur:
-                    mask_prob = gaussian_blur(mask_prob)
+                    mask_prob = gaussian_blur(mask_prob, gaussian_blur_strength)
 
                 prob_min = mask_prob.min().item()
                 prob_max = mask_prob.max().item()
