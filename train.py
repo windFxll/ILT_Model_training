@@ -199,7 +199,11 @@ def main():
     num_workers = int(config.get("num_workers", 0))
 
     lr = float(config["lr"])
-
+    
+    base_logits_scale = float(config.get("base_logits_scale", 1.5))
+    delta_scale = float(config.get("delta_scale", 0.5))
+    sigmoid_scale = float(config.get("sigmoid_scale", 1.0))
+    
     # ==================================================
     # Dataset
     # ==================================================
@@ -369,23 +373,12 @@ def main():
 
                 # 网络输出 correction（增量修正）
                 delta = inverse_model(target)
-                delta = 0.5 * torch.tanh(delta)
+                delta = torch.tanh(delta)
 
-                # ------------------------------------------
-                # 初始化 mask logits
-                # target:
-                #   0 -> -5
-                #   1 -> +5
-                #
-                # 这样 sigmoid 后：
-                # 初始 mask ≈ target
-                # ------------------------------------------
-
-                base_logits = (target * 2.0 - 1.0) * 1.5
+                base_logits = target * 2.0 - 1.0
 
                 # 最终 logits
-                delta_scale = 1.0
-                mask_logits = base_logits + delta_scale * delta
+                mask_logits = base_logits * base_logits_scale + delta_scale * delta
                 delta_min = delta.min().item()
                 delta_max = delta.max().item()
                 delta_mean = delta.mean().item()
@@ -396,28 +389,12 @@ def main():
                 mask_mean = mask_logits.mean().item()
 
                 # sigmoid
-                mask_prob = torch.sigmoid(mask_logits)
+                sigmoid_scale = 1.0
+                mask_prob = torch.sigmoid(sigmoid_scale * mask_logits)
 
                 prob_min = mask_prob.min().item()
                 prob_max = mask_prob.max().item()
                 prob_mean = mask_prob.mean().item()
-                
-                # # ==========================================
-                # # Inverse Lithography
-                # # ==========================================
-
-                # mask_pred = inverse_model(target)
-                
-                # mask_min = mask_pred.min().item()
-                # mask_max = mask_pred.max().item()
-                # mask_mean = mask_pred.mean().item()
-
-                # mask_prob = torch.sigmoid(mask_pred / 5.0)
-                # prob_min = mask_prob.min().item()
-                # prob_max = mask_prob.max().item()
-                # prob_mean = mask_prob.mean().item()
-                
-                # mask_prob = gaussian_blur(mask_prob)
 
                 resist_pred = forward_model(mask_prob)
 

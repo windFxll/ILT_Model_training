@@ -171,6 +171,38 @@ def main():
     cfg = load_config(cfg_path)
 
     print(f"[Init] Using config: {cfg_path}")
+    
+    # ==================================================
+    # infer parameters
+    # ==================================================
+
+    base_logits_scale = cfg.get(
+        "base_logits_scale",
+        1.5
+    )
+
+    delta_scale = cfg.get(
+        "delta_scale",
+        0.5
+    )
+
+    sigmoid_scale = cfg.get(
+        "sigmoid_scale",
+        1.0
+    )
+
+    use_gaussian_blur = cfg.get(
+        "use_gaussian_blur",
+        False
+    )
+
+    print(
+        f"[Infer Params] "
+        f"base={base_logits_scale}, "
+        f"delta={delta_scale}, "
+        f"sigmoid={sigmoid_scale}, "
+        f"blur={use_gaussian_blur}"
+    )
 
     # ==================================================
     # 模型选择
@@ -258,22 +290,22 @@ def main():
 
                 delta = model(x)
 
-                delta = 0.5 * torch.tanh(delta)
+                delta = torch.tanh(delta)
 
                 # ==========================================
                 # base logits
                 # 与 train.py 保持一致
                 # ==========================================
 
-                base_logits = (x * 2.0 - 1.0) * 1.5
+                base_logits = x * 2.0 - 1.0
 
                 # ==========================================
                 # final logits
                 # ==========================================
 
-                mask_logits = base_logits + delta
+                mask_logits = base_logits * base_logits_scale + delta_scale * delta
 
-                mask_prob = torch.sigmoid(mask_logits)
+                mask_prob = torch.sigmoid(sigmoid_scale * mask_logits)
                 
                 mask_prob = gaussian_blur(mask_prob)
 
