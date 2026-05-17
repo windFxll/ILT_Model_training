@@ -3,6 +3,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+# ==================================================
+# BCE Loss
+# ==================================================
+
 def bce_loss(pred, target):
 
     return F.binary_cross_entropy_with_logits(
@@ -10,6 +14,10 @@ def bce_loss(pred, target):
         target,
     )
 
+
+# ==================================================
+# Dice Loss
+# ==================================================
 
 def dice_loss(pred, target, eps=1e-6):
 
@@ -27,14 +35,25 @@ def dice_loss(pred, target, eps=1e-6):
     return 1.0 - dice.mean()
 
 
+# ==================================================
+# MSE Loss
+# ==================================================
+
 def mse_loss(pred, target):
 
     pred = torch.sigmoid(pred)
 
     return F.mse_loss(pred, target)
 
+
+# ==================================================
+# TV Loss
+# ==================================================
+
 def tv_loss(pred):
-    
+
+    pred = torch.sigmoid(pred)
+
     dh = torch.mean(
         torch.abs(
             pred[:, :, 1:, :] - pred[:, :, :-1, :]
@@ -50,16 +69,44 @@ def tv_loss(pred):
     return dh + dw
 
 
+# ==================================================
+# Laplacian Loss
+# ==================================================
+
+def laplacian_loss(pred):
+
+    pred = torch.sigmoid(pred)
+
+    lap = (
+        -4 * pred
+        + torch.roll(pred, 1, dims=2)
+        + torch.roll(pred, -1, dims=2)
+        + torch.roll(pred, 1, dims=3)
+        + torch.roll(pred, -1, dims=3)
+    )
+
+    return lap.abs().mean()
+
+
+# ==================================================
+# Loss Registry
+# ==================================================
+
 LOSS_REGISTRY = {
     "bce": bce_loss,
     "dice": dice_loss,
     "mse": mse_loss,
     "tv": tv_loss,
+    "lap": laplacian_loss,
 }
 
 
+# ==================================================
+# Combined Loss
+# ==================================================
+
 class CombinedLoss(nn.Module):
-    
+
     def __init__(self, config):
 
         super().__init__()
@@ -71,7 +118,10 @@ class CombinedLoss(nn.Module):
         for name, weight in weights.items():
 
             if name not in LOSS_REGISTRY:
-                raise ValueError(f"Unknown loss: {name}")
+
+                raise ValueError(
+                    f"Unknown loss: {name}"
+                )
 
             self.loss_items.append(
                 (LOSS_REGISTRY[name], weight, name)
@@ -91,20 +141,15 @@ class CombinedLoss(nn.Module):
         for fn, weight, name in self.loss_items:
 
             # ==========================================
-            # TV Loss 使用 mask_prob
+            # Regularization Loss
             # ==========================================
 
-            if name == "tv":
+            if name in ["tv", "lap"]:
 
-                if mask_prob is None:
-                    raise ValueError(
-                        "mask_prob is required for tv loss"
-                    )
-
-                loss = fn(mask_prob)
+                loss = fn(pred)
 
             # ==========================================
-            # 其它 loss 保持原逻辑
+            # Reconstruction Loss
             # ==========================================
 
             else:
