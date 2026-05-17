@@ -32,7 +32,6 @@ outputs/
 .DS_Store
 Thumbs.db
 
-image_comparation.py
 train_log_figure.py
 run_pipeline.py
 rename.py

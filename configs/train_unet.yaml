@@ -7,10 +7,16 @@ loss:
   weights:
     mse: 1
 
-save_every: 1
+base_logits_scale: 0.3
+delta_scale: 0.7
+sigmoid_scale: 1.0
+
+use_gaussian_blur: true
+
+save_every: 2
 lr: 0.00001
-batch_size: 50
-epochs: 30
+batch_size: 5
+epochs: 50
 weight_decay: 0.00001
 log_every: 1
 
@@ -25,7 +31,9 @@ pattern_types:
   - mental_circle
 
 output_root: /content/drive/MyDrive/Colab Notebooks/experiments_ILT
-output_dir: exp_ilt_unet_smooth_debug
+output_dir: exp_ilt_unet_smooth_mse_0.3base_0.7delta_sigmoid_blur
 device: auto
 num_workers: 0
 seed: 42
+
+remark: 学习率必须是 1e-5。原有的1e-4会出现异常图像
