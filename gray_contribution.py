@@ -11,18 +11,35 @@ from pathlib import Path
 # ==================================================
 
 ROOT_DIR = Path(
-    r"\content\drive\MyDrive\Colab Notebooks\experiments_ILT\exp_ilt_unet_smooth_mse_0.4base_0.6delta_copy"
+    "/content/drive/MyDrive/Colab Notebooks/experiments_ILT/exp_ilt_unet_smooth_mse_0.4base_0.6delta_5sigmoid"
 )
 
 # ==================================================
 # 找所有 checkpoint_epoch_xxx
 # ==================================================
 
+# checkpoint_dirs = sorted(
+#     [
+#         p for p in ROOT_DIR.iterdir()
+#         if p.is_dir() and p.name.startswith("checkpoint_epoch_")
+#     ]
+# )
+
+def extract_epoch(name):
+    
+    return int(name.split("_")[-1])
+
+
+target_epochs = {0, 10, 20, 30, 40, 50}
+
 checkpoint_dirs = sorted(
     [
         p for p in ROOT_DIR.iterdir()
-        if p.is_dir() and p.name.startswith("checkpoint_epoch_")
-    ]
+        if p.is_dir()
+        and p.name.startswith("checkpoint_epoch_")
+        and extract_epoch(p.name) in target_epochs
+    ],
+    key=lambda x: extract_epoch(x.name)
 )
 
 print(f"Found {len(checkpoint_dirs)} checkpoints")
@@ -40,7 +57,7 @@ all_results = {}
 
 for checkpoint_dir in checkpoint_dirs:
 
-    infer_dir = checkpoint_dir / "infer"
+    infer_dir = checkpoint_dir / "infer_gray"
 
     if not infer_dir.exists():
         print(f"Skip: {infer_dir}")

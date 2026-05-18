@@ -87,6 +87,18 @@ def laplacian_loss(pred):
 
     return lap.abs().mean()
 
+# ==================================================
+# Binary Loss
+# ==================================================
+
+def binary_loss(pred):
+
+    pred = torch.sigmoid(pred)
+
+    loss = pred * (1.0 - pred)
+
+    return loss.mean()
+
 
 # ==================================================
 # Loss Registry
@@ -98,6 +110,7 @@ LOSS_REGISTRY = {
     "mse": mse_loss,
     "tv": tv_loss,
     "lap": laplacian_loss,
+    "binary": binary_loss,
 }
 
 
@@ -144,7 +157,7 @@ class CombinedLoss(nn.Module):
             # Regularization Loss
             # ==========================================
 
-            if name in ["tv", "lap"]:
+            if name in ["tv", "lap", "binary"]:
 
                 loss = fn(pred)
 
