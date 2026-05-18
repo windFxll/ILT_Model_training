@@ -91,11 +91,14 @@ def laplacian_loss(pred):
 # Binary Loss
 # ==================================================
 
-def binary_loss(pred):
-
+def binary_loss(pred, eps=1e-6):
+    
     pred = torch.sigmoid(pred)
 
-    loss = pred * (1.0 - pred)
+    loss = -(
+        pred * torch.log(pred + eps)
+        + (1 - pred) * torch.log(1 - pred + eps)
+    )
 
     return loss.mean()
 
