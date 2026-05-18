@@ -5,14 +5,11 @@ forward_checkpoint: Forward_Model.pt
 
 loss:
   weights:
-    bce: 1
-    dice: 1
     mse: 1
-    lap: 0.001
 
-base_logits_scale: 1.2
-delta_scale: 1.8
-sigmoid_scale: 2.0
+base_logits_scale: 0.4
+delta_scale: 0.6
+sigmoid_scale: 15
 
 use_gaussian_blur: True
 blur_strength: 2.0
@@ -35,7 +32,7 @@ pattern_types:
   - mental_circle
 
 output_root: /content/drive/MyDrive/Colab Notebooks/experiments_ILT
-output_dir: exp_ilt_unet_smooth_bce_dice_mse_0.001lap_1.2base_1.8delta_2sigmoid_2blur
+output_dir: exp_ilt_unet_smooth_mse_0.4base_0.6delta_15sigmoid_2blur
 
 device: auto
 num_workers: 0

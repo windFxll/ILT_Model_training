@@ -422,15 +422,15 @@ def main():
 
                 # 网络输出 correction（增量修正）
                 delta = inverse_model(target)
-                delta = torch.tanh(delta)
+                delta_logits = torch.tanh(delta)
 
                 base_logits = target * 2.0 - 1.0
 
                 # 最终 logits
-                mask_logits = base_logits * base_logits_scale + delta_scale * delta
-                delta_min = delta.min().item()
-                delta_max = delta.max().item()
-                delta_mean = delta.mean().item()
+                mask_logits = (base_logits_scale * base_logits + delta_scale * delta_logits) / (base_logits_scale + delta_scale)
+                delta_min = delta_logits.min().item()
+                delta_max = delta_logits.max().item()
+                delta_mean = delta_logits.mean().item()
 
                 # 日志统计
                 mask_min = mask_logits.min().item()
@@ -440,6 +440,7 @@ def main():
                 # sigmoid
                 mask_prob = torch.sigmoid(sigmoid_scale * mask_logits)
                 
+                # gauss blur
                 if use_gaussian_blur:
                     mask_prob = gaussian_blur(mask_prob, gaussian_blur_strength)
 

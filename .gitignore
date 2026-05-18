@@ -35,3 +35,8 @@ Thumbs.db
 train_log_figure.py
 run_pipeline.py
 rename.py
+gds_converter.py
+global_tools.py
+slitho_sim.py
+
+80nm_basic_setup.slo

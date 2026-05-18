@@ -290,7 +290,7 @@ def main():
 
                 delta = model(x)
 
-                delta = torch.tanh(delta)
+                delta_logits = torch.tanh(delta)
 
                 base_logits = x * 2.0 - 1.0
 
@@ -298,7 +298,7 @@ def main():
                 # final logits
                 # ==========================================
 
-                mask_logits = base_logits * base_logits_scale + delta_scale * delta
+                mask_logits = (base_logits_scale * base_logits + delta_scale * delta_logits) / (base_logits_scale + delta_scale)
 
                 mask_prob = torch.sigmoid(sigmoid_scale * mask_logits)
                 
